@@ -62,6 +62,46 @@ Benchmarks are run locally against your own Ollama instance. No external API key
 - **Synthetic tests** — prompts are fixed; real-world performance varies
 - **No secrets required** — Ollama runs locally without API keys
 
+## Merged: kadima-bench
+
+[`kadima-bench`](https://github.com/arigatoexpress/kadima-bench) has been folded
+into this canonical repo and now lives under [`vendor/kadima-bench/`](vendor/kadima-bench/),
+imported via `git subtree` so its full commit history is preserved. The upstream
+`kadima-bench` repo will be archived after this merge lands.
+
+**What kadima-bench is:** a packaged, CLI-driven local-LLM benchmarking framework
+(`pip install -e vendor/kadima-bench`, then `kadima-bench run ...`). It covers the
+same problem space as the scripts in this repo root — local models via Ollama, GPU
+isolation, quality scoring, and matplotlib visualizations — but with a cleaner,
+modular architecture (backends / suites / metrics / visualize), streaming latency
+metrics (TTFT, ITL percentiles), Pareto-frontier composite scoring, an optional
+lm-eval-harness bridge, and TOML config.
+
+### Overlap vs. this repo's root scripts
+
+| Concern | Root scripts (this repo) | `vendor/kadima-bench` |
+|---|---|---|
+| Entry point | many ad-hoc `*.py` scripts | single `kadima-bench` CLI |
+| Focus | Qwen-family comparisons | general consumer-GPU models |
+| GPU isolation | yes (clears VRAM) | yes (`ollama stop` between models) |
+| Quality scoring | `quality_evaluator.py` | `metrics/quality.py` (8 categories, pass/fail) |
+| Latency | aggregate t/s | streaming TTFT + ITL p50/p95/p99 |
+| Charts | `improved_visualizations.py` | `visualize/charts.py` (7 charts) |
+| Config | hard-coded model lists | `*.toml` |
+
+### Dedup / reconciliation TODO (deferred — separate PR)
+
+The two suites substantially overlap and should be reconciled. Heavy dedup is
+intentionally **out of scope** for this merge (one concern per PR). Follow-ups:
+
+- [ ] Decide the canonical engine: migrate the root `*.py` scripts onto the
+      `kadima-bench` framework (preferred) and retire the duplicated ad-hoc scripts.
+- [ ] Fold the Qwen-specific suites/prompts into `kadima_bench/suites/` as a preset.
+- [ ] Unify result JSON schemas and chart generators (drop the duplicate chart code).
+- [ ] Consolidate the two READMEs / docs once the engine is chosen.
+- [ ] Move `vendor/kadima-bench` to a top-level package (or keep as vendored) per
+      the chosen layout.
+
 ## Agent collaborators
 
 See [AGENTS.md](AGENTS.md) for script descriptions and conventions.
